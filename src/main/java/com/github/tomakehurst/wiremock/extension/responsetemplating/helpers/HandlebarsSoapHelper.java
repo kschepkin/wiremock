@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.tomakehurst.wiremock.matching;
+package com.github.tomakehurst.wiremock.extension.responsetemplating.helpers;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+/**
+ * This class uses HandlebarsXmlHelper as a base an just set a prefix which reduce the written handlebars helper to the
+ * relevant part
+ */
+public class HandlebarsSoapHelper extends HandlebarsXPathHelper {
 
-@JsonDeserialize(using = ContentPatternDeserialiser.class)
-public abstract class ContentPattern<T> implements NamedValueMatcher<T> {
-
-    protected final T expectedValue;
-
-    public ContentPattern(T expectedValue) {
-        this.expectedValue = expectedValue;
-    }
-
-    @JsonIgnore
-    public T getValue() {
-        return expectedValue;
+    @Override
+    protected String getXPathPrefix() {
+        return "/Envelope/Body/";
     }
 }

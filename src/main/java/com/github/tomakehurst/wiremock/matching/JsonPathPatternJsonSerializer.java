@@ -15,20 +15,13 @@
  */
 package com.github.tomakehurst.wiremock.matching;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
-@JsonDeserialize(using = ContentPatternDeserialiser.class)
-public abstract class ContentPattern<T> implements NamedValueMatcher<T> {
+import java.io.IOException;
 
-    protected final T expectedValue;
-
-    public ContentPattern(T expectedValue) {
-        this.expectedValue = expectedValue;
-    }
-
-    @JsonIgnore
-    public T getValue() {
-        return expectedValue;
+public class JsonPathPatternJsonSerializer extends PathPatternJsonSerializer<MatchesJsonPathPattern> {
+    @Override
+    protected void serializeAdditionalFields(MatchesJsonPathPattern value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
     }
 }

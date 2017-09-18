@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.tomakehurst.wiremock.matching;
+package com.github.tomakehurst.wiremock.http;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+public class HttpStatus {
 
-@JsonDeserialize(using = ContentPatternDeserialiser.class)
-public abstract class ContentPattern<T> implements NamedValueMatcher<T> {
-
-    protected final T expectedValue;
-
-    public ContentPattern(T expectedValue) {
-        this.expectedValue = expectedValue;
+    public static boolean isSuccess(int code) {
+        return ((200 <= code) && (code <= 299));
     }
 
-    @JsonIgnore
-    public T getValue() {
-        return expectedValue;
+    public static boolean isRedirection(int code) {
+        return ((300 <= code) && (code <= 399));
+    }
+
+    public static boolean isClientError(int code) {
+        return ((400 <= code) && (code <= 499));
+    }
+
+    public static boolean isServerError(int code) {
+        return ((500 <= code) && (code <= 599));
     }
 }

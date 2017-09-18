@@ -28,9 +28,13 @@ import org.apache.http.entity.ContentType;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import java.net.SocketException;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -285,7 +289,34 @@ public class StubbingAcceptanceTest extends AcceptanceTestBase {
 
 		response = testClient.post("/match/binary", new ByteArrayEntity(requestBody, APPLICATION_OCTET_STREAM));
 		assertThat(response.statusCode(), is(HTTP_OK));
+	}
 
+	@Test
+	public void matchingOnRequestBodyWithAdvancedJsonPath() {
+		stubFor(post("/jsonpath/advanced")
+			.withRequestBody(matchingJsonPath("$.counter", equalTo("123")))
+			.willReturn(ok())
+		);
+
+		WireMockResponse response = testClient.postJson("/jsonpath/advanced", "{ \"counter\": 234 }");
+		assertThat(response.statusCode(), is(HTTP_NOT_FOUND));
+
+        response = testClient.postJson("/jsonpath/advanced", "{ \"counter\": 123 }");
+		assertThat(response.statusCode(), is(HTTP_OK));
+	}
+
+	@Test
+	public void matchingOnRequestBodyWithAdvancedXPath() {
+		stubFor(post("/xpath/advanced")
+			.withRequestBody(matchingXPath("//counter/text()", equalTo("123")))
+			.willReturn(ok())
+		);
+
+		WireMockResponse response = testClient.postXml("/xpath/advanced", "<counter>6666</counter>");
+		assertThat(response.statusCode(), is(HTTP_NOT_FOUND));
+
+		response = testClient.postXml("/xpath/advanced", "<counter>123</counter>");
+		assertThat(response.statusCode(), is(HTTP_OK));
 	}
 
 	@Test
@@ -341,6 +372,20 @@ public class StubbingAcceptanceTest extends AcceptanceTestBase {
 		stubFor(get(urlEqualTo("/priority/resource")).atPriority(2).willReturn(aResponse().withStatus(200)));
 
 		assertThat(testClient.get("/priority/resource").statusCode(), is(200));
+	}
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+	@Test
+	public void connectionResetByPeerFault() {
+		stubFor(get(urlEqualTo("/connection/reset")).willReturn(
+                aResponse()
+                .withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
+		exception.expectCause(IsInstanceOf.<Throwable>instanceOf(SocketException.class));
+		exception.expectMessage("java.net.SocketException: Connection reset");
+		testClient.get("/connection/reset");
 	}
 
 	@Test
