@@ -95,7 +95,7 @@ public class JettyHttpServer implements HttpServer {
 
         jettyServer.setHandler(createHandler(options, adminRequestHandler, stubRequestHandler));
 
-        finalizeSetup();
+        finalizeSetup(options);
     }
 
     protected HandlerCollection createHandler(Options options, AdminRequestHandler adminRequestHandler, StubRequestHandler stubRequestHandler) {
@@ -115,8 +115,10 @@ public class JettyHttpServer implements HttpServer {
         return handlers;
     }
 
-    protected void finalizeSetup() {
-        jettyServer.setStopTimeout(0);
+    protected void finalizeSetup(Options options) {
+        if(!options.jettySettings().getStopTimeout().isPresent()) {
+            jettyServer.setStopTimeout(0);
+        }
     }
 
     protected Server createServer(Options options) {
@@ -179,6 +181,10 @@ public class JettyHttpServer implements HttpServer {
     @Override
     public int httpsPort() {
         return httpsConnector.getLocalPort();
+    }
+
+    protected long stopTimeout() {
+        return jettyServer.getStopTimeout();
     }
 
     protected ServerConnector createHttpConnector(
