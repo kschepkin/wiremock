@@ -57,3 +57,5 @@ tmp*
 
 src/main/resources/swagger
 docs-v2/_docs/wiremock-admin-api.html
+src/main/frontend/wiremock/yarn-v0.27.5/
+src/main/frontend/wiremock/yarn.lock

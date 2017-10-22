@@ -14,6 +14,7 @@ buildscript {
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id 'com.moowork.node' version '1.2.0'
 }
 
 apply plugin: 'java'
@@ -94,6 +95,17 @@ dependencies {
 
 compileTestJava {
     options.encoding = 'UTF-8'
+}
+
+node{
+    version = '7.10.1'
+    yarnVersion = '0.27.5'
+    download = true
+    workDir = file('build/node')
+//    nodeModulesDir = file('${project.projectDir}/src/main/frontend/wiremock')
+//    nodeModulesDir = file('.')
+//    npmWorkDir = file('docs-v2')
+//    yarnWorkDir = file('src/main/frontend/wiremock')
 }
 
 test {
@@ -348,16 +360,73 @@ task signAll {
     dependsOn signJars, signThinJar, signShadowJar, signThinJarPom, signStandaloneJarPom
 }
 
-task npmInstall(type: Exec) {
-    workingDir 'docs-v2'
-    commandLine 'npm', 'i'
+
+task generateFrontend(type: GradleBuild){
+    tasks = ['frontendNpmInstall', 'frontendBuild']
 }
 
-task generateApiDocs(type: Exec) {
-    dependsOn npmInstall
-    workingDir 'docs-v2'
-    commandLine 'npm', 'run', 'apidocs'
+task frontendNpmInstall(type: YarnTask){
+    workingDir = file('src/main/frontend/wiremock')
+    args = ['install']
 }
+
+task frontendBuild(type: YarnTask){
+    workingDir = file('src/main/frontend/wiremock')
+    args = ['run', 'buildOld']
+}
+
+jar.dependsOn generateFrontend
+
+task generateApiDocs(type: GradleBuild){
+    tasks = ['docsNpmInstall', 'apiDocsClean', 'apiDocsPrepare', 'apiDocsCleanSchemas', 'apiDocsExecuteSchemasScript', 'apiDocsExecuteRamlScript', 'apiDocsExecuteApiSpecConverterScript']
+}
+
+task docsNpmInstall(type: NpmTask){
+    workingDir = file('docs-v2')
+    args = ['install']
+}
+
+task apiDocsClean(type: Delete){
+    delete 'docs-v2/tmp/raml'
+}
+
+task apiDocsPrepare(type: Copy){
+    from 'src/main/resources/raml'
+    into{
+        'docs-v2/tmp/raml'
+    }
+}
+
+task apiDocsCleanSchemas(type: Delete){
+    def dirName = 'docs-v2/tmp/raml/schemas'
+    delete dirName
+
+    doLast{
+        file(dirName).mkdirs()
+    }
+}
+
+task apiDocsExecuteSchemasScript(type: NodeTask){
+    workingDir = file('docs-v2')
+    script = file('docs-v2/bin/bundle-schemas')
+    args = ['-i', '../src/main/resources/raml/schemas','-o', 'tmp/raml/schemas']
+}
+
+task apiDocsExecuteRamlScript(type: NodeTask){
+    workingDir = file('docs-v2')
+    script = file('docs-v2/node_modules/raml2html/bin/raml2html')
+    args = ['-t', 'lib/raml2html-template.nunjucks','-i', 'tmp/raml/wiremock-admin-api.raml', '-o', '_docs/wiremock-admin-api.html']
+}
+
+task apiDocsExecuteApiSpecConverterScript(type: NpmTask){
+    workingDir = file('docs-v2')
+    args = ['run', 'apidocs']
+
+    doFirst{
+        file('src/main/resources/swagger').mkdirs()
+    }
+}
+
 jar.dependsOn generateApiDocs
 processResources.dependsOn generateApiDocs
 
