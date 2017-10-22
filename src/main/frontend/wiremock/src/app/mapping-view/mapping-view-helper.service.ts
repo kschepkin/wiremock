@@ -90,24 +90,24 @@ export class MappingViewHelperService {
   }
 
   static helperRtCopyJson(messageService: MessageService): void {
-    if (UtilService.copyToClipboard('{{wmJson request.body \'$.\'}}')) {
-      messageService.setMessage(new Message('wmJson copied to clipboard', MessageType.INFO, 3000));
+    if (UtilService.copyToClipboard('{{jsonPath request.body \'$.\'}}')) {
+      messageService.setMessage(new Message('jsonPath copied to clipboard', MessageType.INFO, 3000));
     } else {
       messageService.setMessage(new Message(MappingViewHelperService.COPY_FAILURE, MessageType.ERROR, 10000));
     }
   }
 
   static helperRtCopyXml(messageService: MessageService) {
-    if (UtilService.copyToClipboard('{{wmXml request.body \'/\'}}')) {
-      messageService.setMessage(new Message('wmXml copied to clipboard', MessageType.INFO, 3000));
+    if (UtilService.copyToClipboard('{{xPath request.body \'/\'}}')) {
+      messageService.setMessage(new Message('xPath copied to clipboard', MessageType.INFO, 3000));
     } else {
       messageService.setMessage(new Message(MappingViewHelperService.COPY_FAILURE, MessageType.ERROR, 10000));
     }
   }
 
   static helperRtCopySoap(messageService: MessageService) {
-    if (UtilService.copyToClipboard('{{wmSoap request.body \'/\'}}')) {
-      messageService.setMessage(new Message('wmSoap copied to clipboard', MessageType.INFO, 3000));
+    if (UtilService.copyToClipboard('{{soapXPath request.body \'/\'}}')) {
+      messageService.setMessage(new Message('soapXPath copied to clipboard', MessageType.INFO, 3000));
     } else {
       messageService.setMessage(new Message(MappingViewHelperService.COPY_FAILURE, MessageType.ERROR, 10000));
     }
