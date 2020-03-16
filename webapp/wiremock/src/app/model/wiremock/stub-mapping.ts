@@ -35,6 +35,7 @@ export class StubMapping extends Proxy implements Item {
     mapping.response = new ResponseDefinition();
     mapping.response.status = 200;
     mapping.response.body = '';
+    mapping.response.bodyFileName = '';
     mapping.response.headers = {
       'Content-Type': 'text/plain'
     };
