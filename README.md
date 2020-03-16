@@ -80,3 +80,17 @@ Images
 [Separated View](./images/mappings-separated.png)
 
 [StateMachine](./images/state-machine.png)
+
+Building WireMock locally
+-------------------------
+To run all of WireMock's tests:
+```bash
+./gradlew clean test
+```
+
+To build both JARs (thin and standalone):
+```bash
+./gradlew -c release-settings.gradle :java8:shadowJar
+```
+
+The built JAR will be placed under ``java8/build/libs``.
